@@ -1,4 +1,4 @@
-﻿using _Infrastructre.Configs;
+﻿using Infrastructure.Configs;
 using Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructre.Data
+namespace Infrastructure.Data
 {
     public class StoreContext(DbContextOptions<StoreContext> options): DbContext(options)
     {

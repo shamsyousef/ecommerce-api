@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace _Infrastructre.Configs
+namespace Infrastructure.Configs
 {
     
         public class ProductConfiguration : IEntityTypeConfiguration<Product>
@@ -15,8 +15,8 @@ namespace _Infrastructre.Configs
             public void Configure(EntityTypeBuilder<Product> builder)
             {
                 builder.Property(x => x.Price).HasColumnType("decimal(18,2)");
-                builder.Property(x => x.Name).IsRequired().HasMaxLength(15);
+                builder.Property(x => x.Name).IsRequired().HasMaxLength(200);
             }
         }
-    
+   
 }
