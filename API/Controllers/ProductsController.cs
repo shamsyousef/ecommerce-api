@@ -4,6 +4,7 @@ using Core.Entities;
 using Core.Interfaces;
 using Core.Specifications;
 using Microsoft.AspNetCore.Http.HttpResults;
+using API.RequestHelper;
 
 namespace API.Controllers
 {
@@ -13,11 +14,13 @@ namespace API.Controllers
     {
        
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<Product>>> GetProducts(string? brand , string? type )
+        public async Task<ActionResult<IReadOnlyList<Product>>> GetProducts([FromQuery] ProductSpecParams specParams)
         {
-            var spec = new ProductSpecification(brand, type);
+            var spec = new ProductSpecification(specParams);
             var Products = await _repo.ListAsync(spec);
-            return Ok (Products);
+            var Count=await _repo.CountAsync(spec);
+            var pagination = new Pagination<Product>(specParams.PageIndex, specParams.PageSize, Count, Products);
+            return Ok (pagination);
         }
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
@@ -28,6 +31,20 @@ namespace API.Controllers
                 return NotFound();
 
             return Ok(product);
+        }
+        [HttpGet("brands")]
+        public async Task<ActionResult<IReadOnlyList<string>>> GetBrands()
+        {
+            var spec = new BrandListSpecification();
+            var brands = await _repo.ListAsync(spec);
+            return Ok(brands);
+        }
+        [HttpGet("types")]
+        public async Task<ActionResult<IReadOnlyList<string>>> GetTypes()
+        {
+            var spec = new TypeListSpecification();
+            var types = await _repo.ListAsync(spec);
+            return Ok(types);
         }
         [HttpPost]
         public async Task<ActionResult<Product>> CreateProduct(Product product)
@@ -61,17 +78,7 @@ namespace API.Controllers
                 return NoContent();
             return BadRequest("Problem deleting product");
         }
-        [HttpGet("brands")]
-        public async Task<ActionResult<IReadOnlyList<string>>> GetBrands()
-        {
-            return Ok();
-        }
-
-        [HttpGet("types")]
-        public async Task<ActionResult<IReadOnlyList<string>>> GetTypes()
-        {
-            return Ok();
-        }
+      
         private bool ProductExists(int id)
         {
             return _repo.Exists(id);
