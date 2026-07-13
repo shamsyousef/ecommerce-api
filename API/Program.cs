@@ -1,6 +1,6 @@
 using Core.Interfaces;
 using Infrastructure.Data;
-
+using API.Middleware;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +20,16 @@ builder.Services.AddDbContext<StoreContext>(options =>
         });
 });
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        policy
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .WithOrigins("http://localhost:4200");
+    });
+});
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
@@ -32,6 +42,8 @@ using (var scope = app.Services.CreateScope())
     await StoreContextSeed.SeedAsync(context);
 }
 
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseCors("CorsPolicy");
 app.MapControllers();
 
 app.Run();
