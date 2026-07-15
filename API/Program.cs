@@ -2,6 +2,10 @@ using Core.Interfaces;
 using Infrastructure.Data;
 using API.Middleware;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
+using Microsoft.OpenApi.Validations;
+using System.Linq.Expressions;
+using Infrastructure.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -30,6 +34,14 @@ builder.Services.AddCors(options =>
             .WithOrigins("http://localhost:4200");
     });
 });
+builder.Services.AddSingleton<IConnectionMultiplexer>(config => {
+    var conString = builder.Configuration.GetConnectionString("Redis")
+    ?? throw new Exception("Cannot get redis connection string ");
+    var configuration = ConfigurationOptions.Parse(conString, true);
+    return ConnectionMultiplexer.Connect(configuration);
+
+   } );
+builder.Services.AddSingleton<ICartService, CartService>();
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
